@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu as builder
 
 ARG NETHACK_TAR=nethack4-4.3-beta2.tar.gz
 
@@ -19,8 +19,11 @@ WORKDIR nethack4-4.3-beta2/build
 USER nethack
 RUN ../aimake -i /opt/ --without=gui || true # This always fails, so ignore
 
-# USER root
-# RUN mkdir /home/nethack && chown nethack:nethack /home/nethack
-# USER nethack
+FROM ubuntu
+
+COPY --from=builder /opt /opt
+RUN useradd nethack -m
+
+USER nethack
 WORKDIR /home/nethack
 ENTRYPOINT ["/opt/nethack4"]
